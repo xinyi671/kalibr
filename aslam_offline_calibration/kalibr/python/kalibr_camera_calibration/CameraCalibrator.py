@@ -29,7 +29,7 @@ class OptimizationDiverged(Exception):
     pass
 
 class CameraGeometry(object):
-    def __init__(self, cameraModel, targetConfig, dataset, geometry=None, verbose=False):
+    def __init__(self, cameraModel, targetConfig, dataset, geometry=None, verbose=True):
         self.dataset = dataset
         
         self.model = cameraModel
@@ -74,7 +74,7 @@ class CameraGeometry(object):
         return success
 
 class TargetDetector(object):
-    def __init__(self, targetConfig, cameraGeometry, showCorners=False, showReproj=False, showOneStep=False):
+    def __init__(self, targetConfig, cameraGeometry, showCorners=True, showReproj=True, showOneStep=True):
         self.targetConfig = targetConfig
         
         #initialize the calibration target

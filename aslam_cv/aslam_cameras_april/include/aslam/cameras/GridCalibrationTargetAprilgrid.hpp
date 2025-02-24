@@ -32,7 +32,7 @@ class GridCalibrationTargetAprilgrid : public GridCalibrationTargetBase {
     AprilgridOptions() :
       doSubpixRefinement(true),
       maxSubpixDisplacement2(1.5),
-      showExtractionVideo(false),
+      showExtractionVideo(true),
       minTagsForValidObs(4),
       minBorderDistance(4.0),
       blackTagBorder(2) {};

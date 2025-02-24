@@ -40,7 +40,7 @@ def initImuBagDataset(bagfile, topic, from_to=None, perform_synchronization=Fals
 #mono camera
 class IccCamera():
     def __init__(self, camConfig, targetConfig, dataset, reprojectionSigma=1.0, showCorners=True, \
-                 showReproj=True, showOneStep=False):
+                 showReproj=True, showOneStep=True):
         
         #store the configuration
         self.dataset = dataset

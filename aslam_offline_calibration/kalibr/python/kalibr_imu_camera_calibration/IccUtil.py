@@ -279,6 +279,48 @@ def exportPoses(cself, filename="poses_imu0.csv"):
         print("{:.0f},".format(1e9 * time) + ",".join(map("{:.6f}".format, position)) \
                + "," + ",".join(map("{:.6f}".format, orientation)) , file=f)
 
+def exportTrajectories(cself, imu_filename="imu_traj.txt", camera_filename="camera_traj.txt"):
+    # 获取 IMU 和 body spline
+    imu = cself.ImuList[0]
+    bodyspline = cself.poseDv.spline()
+    
+    # 获取时间戳
+    times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.imuData 
+                    if im.stamp.toSec() + imu.timeOffset > bodyspline.t_min() 
+                    and im.stamp.toSec() + imu.timeOffset < bodyspline.t_max()])
+    
+    # 保存 IMU 轨迹
+    with open(imu_filename, 'w') as f:
+        print("#timestamp [ns], p_x [m], p_y [m], p_z [m], q_w [], q_x [], q_y [], q_z []", file=f)
+        for time in times:
+            position = bodyspline.position(time)
+            orientation = sm.r2quat(bodyspline.orientation(time))
+            print("{:.0f},".format(1e9 * time) + 
+                  ",".join(map("{:.6f}".format, position)) + "," + 
+                  ",".join(map("{:.6f}".format, orientation)), file=f)
+    
+    # 保存相机轨迹
+    if cself.CameraChain and len(cself.CameraChain.camList) > 0:
+        with open(camera_filename, 'w') as f:
+            print("#timestamp [ns], p_x [m], p_y [m], p_z [m], q_w [], q_x [], q_y [], q_z []", file=f)
+            for time in times:
+                # 获取 IMU 位姿
+                position = bodyspline.position(time)
+                orientation = sm.r2quat(bodyspline.orientation(time))
+                T_w_i = sm.Transformation(orientation, position)
+                
+                # 获取 IMU 到相机的变换
+                T_i_c = cself.CameraChain.getResultTrafoImuToCam(0)  # 假设使用第一个相机
+                
+                # 计算相机在世界坐标系下的位姿
+                T_w_c = T_w_i * T_i_c
+                
+                cam_position = T_w_c.t()
+                cam_orientation = sm.r2quat(T_w_c.C())
+                print("{:.0f},".format(1e9 * time) + 
+                      ",".join(map("{:.6f}".format, cam_position)) + "," + 
+                      ",".join(map("{:.6f}".format, cam_orientation)), file=f)
+                
 def saveResultTxt(cself, filename='cam_imu_result.txt'):
     f = open(filename, 'w')
     printResultTxt(cself, stream=f)
